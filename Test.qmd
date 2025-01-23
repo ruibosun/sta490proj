@@ -1,10 +1,4 @@
 ---
-title: "Test"
-format: html
-editor: visual
----
-
----
 title: "STA490 EDA"
 format: pdf
 editor: visual
