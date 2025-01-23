@@ -4,23 +4,35 @@ format: html
 editor: visual
 ---
 
-## Quarto
+### Introduction
 
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+This study will be using the data from the University of Texas Health Science Center at Houston, which is used for research on how microRNA-138 suppresses glioblastoma proliferation through downregulation. The researchers have already cleaned the data, and the data given to us is already cleaned. However, we are uncertain about the data collection process or the data cleaning that they conducted.
 
-## Running Code
+The cleaned dataset consists of 627 different microRNAs (rows) and data from 4 healthy individuals and 9 glioblastoma patients (columns). The data has two types of variables: numerical and categorical. The name of each microRNA is coded as text, which is considered a categorical variable. The values that represent expression levels for the control group and the glioblastoma groups are all integers.
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+We have checked that the data does not contain any duplicate microRNA; in other words, each row represents a unique microRNA. Moreover, we also verified that the values for the control and glioblastoma columns are all non-negative, and there are no missing values in this dataset. In this EDA section, there is no distinct outlier since the expression levels of a microRNA vary a lot. Hence, no data was removed, and we did not transform the data.
 
-```{r}
-1 + 1
+```{r, inlcude = F}
+
+# Check if col1 has duplicates
+col1_duplicates <- any(duplicated(df$col1))
+if (col1_duplicates) {
+  print("Column 1 has duplicates.")
+} else {
+  print("Column 1 has no duplicates.")
+}
+
+# Check for negative numbers or NAs in the rest of the columns
+for (col in colnames(df)[-1]) {  # Exclude the first column
+  neg_values <- any(df[[col]] < 0, na.rm = TRUE)
+  na_values <- any(is.na(df[[col]]))
+  
+  if (neg_values) {
+    print(paste("Column", col, "contains negative numbers."))
+  }
+  
+  if (na_values) {
+    print(paste("Column", col, "contains NA values."))
+  }
+}
 ```
-
-You can add options to executable code like this
-
-```{r}
-#| echo: false
-2 * 2
-```
-
-The `echo: false` option disables the printing of code (only output is displayed).
