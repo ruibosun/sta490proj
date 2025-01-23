@@ -1,6 +1,6 @@
 ---
 title: "Test"
-format: html
+format: pdf
 editor: visual
 ---
 
@@ -14,25 +14,25 @@ We have checked that the data does not contain any duplicate miRNA; in other wor
 
 ```{r, inlcude = F}
 
-# Check if col1 has duplicates
-col1_duplicates <- any(duplicated(df$col1))
-if (col1_duplicates) {
-  print("Column 1 has duplicates.")
-} else {
-  print("Column 1 has no duplicates.")
-}
-
-# Check for negative numbers or NAs in the rest of the columns
-for (col in colnames(df)[-1]) {  # Exclude the first column
-  neg_values <- any(df[[col]] < 0, na.rm = TRUE)
-  na_values <- any(is.na(df[[col]]))
-  
-  if (neg_values) {
-    print(paste("Column", col, "contains negative numbers."))
-  }
-  
-  if (na_values) {
-    print(paste("Column", col, "contains NA values."))
-  }
-}
+# # Check if col1 has duplicates
+# col1_duplicates <- any(duplicated(df$col1))
+# if (col1_duplicates) {
+#   print("Column 1 has duplicates.")
+# } else {
+#   print("Column 1 has no duplicates.")
+# }
+# 
+# # Check for negative numbers or NAs in the rest of the columns
+# for (col in colnames(df)[-1]) {  # Exclude the first column
+#   neg_values <- any(df[[col]] < 0, na.rm = TRUE)
+#   na_values <- any(is.na(df[[col]]))
+#   
+#   if (neg_values) {
+#     print(paste("Column", col, "contains negative numbers."))
+#   }
+#   
+#   if (na_values) {
+#     print(paste("Column", col, "contains NA values."))
+#   }
+# }
 ```
