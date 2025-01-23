@@ -6,7 +6,7 @@ editor: visual
 
 ### Data Source
 
-This study will be using the data from the University of Texas Health Science Center at Houston, which is used for research on how miRNA-138 suppresses glioblastoma proliferation through downregulation. The researchers have already cleaned the data, and the data given to us is already cleaned. However, we are uncertain about the data collection process or the data cleaning that they conducted.
+This study will be using the data from the University of Texas Health Science Center at Houston, which is used for research on how MicroRNAs (miRNAs) -138 suppresses glioblastoma proliferation through downregulation. Specifically, miRNAs are small noncoding RNAs implicated in the development, progression, and metastasis of various human cancers. The expression levels of specific miRNAs are used to identify their roles as either tumor suppressors or oncogenes in cancer. The researchers have already cleaned the data, and the data given to us is already cleaned. However, we are uncertain about the data collection process or the data cleaning that they conducted.
 
 ### Data Dimensions
 
