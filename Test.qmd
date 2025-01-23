@@ -1,16 +1,17 @@
 ---
 title: "STA490 EDA"
-format: html
+format: pdf
 editor: visual
 ---
 
 ### Descriptive Statistics
 
-```{r, warning=FALSE, echo=FALSE}
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
 # Load necessary libraries
 library(readxl)
 library(dplyr)
 library(ggplot2)
+library(stringr)
 library(knitr)
 library(kableExtra)
 library(igraph)
@@ -18,7 +19,9 @@ library(ggraph)
 library(pheatmap)
 library(tidyr)
 # Load the data
-data <- read_excel("/Users/yuqinghu/Desktop/STA490/CollaborateProject/GSE156937.xlsx", sheet = "in")
+data <- 
+  read_excel("/Users/yuqinghu/Desktop/STA490/CollaborateProject/GSE156937.xlsx", 
+             sheet = "in")
 
 # Convert miRNA_ID to a factor
 data$miRNA_ID <- as.factor(data$miRNA_ID)
@@ -45,10 +48,19 @@ rownames(summary_stats) <- NULL
 # Rename columns for clarity
 colnames(summary_stats) <- c("Statistic", colnames(data)[-1])
 
-# Display Summary Statistics as a Table
-summary_stats %>% 
-  kbl(caption = "Summary Statistics for Numerical Variables") %>% 
-  kable_styling(full_width = FALSE)
+# Split the data into two tables
+control_table <- summary_stats %>% select(Statistic, Ctrl1, Ctrl2, Ctrl3, Ctrl4, GBM1, GBM2, GBM3)
+gbm_table <- summary_stats %>% select(Statistic, GBM4, GBM5, GBM6, GBM7, GBM8, GBM9)
+
+# Generate the first table with the caption
+control_table %>%
+  kbl(caption = "Summary Statistics for Numerical Variables") %>%
+  kable_styling(full_width = FALSE, latex_options = "scale_down")
+
+# Generate the second table without a caption
+gbm_table %>%
+  kbl() %>%
+  kable_styling(full_width = FALSE, latex_options = "scale_down")
 ```
 
 As the descriptive statistics shown, significant variability in miRNA expression levels between control and GBM samples is revealed with GBM exhibiting greater heterogeneity, as indicated by higher standard deviations (e.g., GBM4 with \~19,286). The median expression values are much lower than the means across all samples, suggesting a right-skewed distribution due to a few highly expressed miRNAs. The maximum expression levels in GBM samples (e.g., GBM4 at \~474,457) underscore the extreme upregulation of certain miRNAs, consistent with the known heterogeneity and adaptability of glioblastoma cells. These findings support the potential critical role of miRNAs in regulating glioblastoma stem cells (GSCs), influencing tumor growth, survival, and therapy resistance. This variability highlights miRNAs as potential therapeutic targets, warranting further exploration to identify specific miRNAs that could disrupt GSC functions and improve GBM treatment outcomes.
@@ -67,9 +79,11 @@ data_distribution <- data %>%
 ggplot(data_distribution, aes(x = Group, y = value, fill = Group)) +
   geom_boxplot(outlier.shape = NA) +
   theme_minimal() +
-  labs(title = "Expression Distribution: Control vs GBM (Outliers Removed)", x = "Group", y = "Expression") +
+  labs(title = "Expression Distribution: Control vs GBM", 
+       x = "Group", y = "Expression") +
   coord_cartesian(ylim = c(0, 350)) +
-  stat_summary(fun = mean, geom = "point", shape = 20, size = 3, color = "red", fill = "red")
+  stat_summary(fun = mean, geom = "point", shape = 20, size = 3, 
+               color = "red", fill = "red")
 
 
 ```
@@ -85,7 +99,9 @@ correlation_matrix <- data %>%
   cor()
 
 # Visualize the Correlation Matrix
-heatmap(as.matrix(correlation_matrix), main = "Correlation Matrix", col = topo.colors(10))
+heatmap(as.matrix(correlation_matrix), 
+        main = "Control & GBM Correlation Matrix", 
+        col = topo.colors(10))
 ```
 
 The correlation matrix reveals distinct clustering of control and GBM samples, with each group showing strong intra-group correlations, as indicated by the prevalence of warmer colors (yellow) within their respective clusters. The weaker inter-group correlations, represented by cooler colors (green/blue), highlight the distinct miRNA expression profiles between control and GBM samples. Within the GBM group, there is evidence of heterogeneity, as some samples show slightly varied correlation patterns, reflecting the biological diversity of glioblastoma cells. These findings underscore the unique regulatory roles of miRNAs in GBM and their potential utility in distinguishing GBM-specific expression profiles from controls.
@@ -94,7 +110,7 @@ The correlation matrix reveals distinct clustering of control and GBM samples, w
 # Handle row names
 if (!is.null(rownames(data)) && all(!is.na(rownames(data)))) {
   # Clean row names by removing any suffix like "|0"
-  rownames(data) <- str_remove(rownames(data), "\\|.*")  # Remove "|..." from row names
+  rownames(data) <- str_remove(rownames(data), "\\|.*")
 } else {
   data <- data %>% column_to_rownames(var = "miRNA_ID")
 }
@@ -123,16 +139,16 @@ miRNA_correlation_matrix <- cor(data_t, use = "pairwise.complete.obs")
 correlation_data <- as.data.frame(as.table(miRNA_correlation_matrix)) %>% 
   filter(Var1 != Var2)  # Exclude self-correlations
 
-# Find the top 20 strongest correlations (positive and negative) by absolute value
 strongest_correlations <- correlation_data %>% 
   mutate(abs_value = abs(Freq)) %>% 
   arrange(desc(abs_value)) %>% 
   slice(1:25) %>% 
-  arrange(desc(Freq))  # Retain original correlation values and prioritize positive/negative separately
+  arrange(desc(Freq))
 
 
 # Extract unique variables involved in top correlations
-unique_vars <- unique(c(strongest_correlations$Var1, strongest_correlations$Var2))
+unique_vars <- unique(c(strongest_correlations$Var1, 
+                        strongest_correlations$Var2))
 
 # Prepare the subset correlation matrix
 heatmap_matrix <- miRNA_correlation_matrix[unique_vars, unique_vars]
@@ -165,7 +181,8 @@ correlation_summary <- correlation_data %>%
 # Display the summary table using kable
 correlation_summary %>% 
   kbl(caption = "Summary of miRNA Correlations") %>% 
-  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", "condensed"))
+  kable_styling(full_width = FALSE, bootstrap_options = c("striped", "hover", 
+                                                          "condensed"))
 
 ```
 
