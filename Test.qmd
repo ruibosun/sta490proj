@@ -10,6 +10,18 @@ format: pdf
 editor: visual
 ---
 
+### Data Source
+
+This study will be using the data from the University of Texas Health Science Center at Houston, which is used for research on how MicroRNAs (miRNAs) -138 suppresses glioblastoma proliferation through downregulation. Specifically, miRNAs are small noncoding RNAs implicated in the development, progression, and metastasis of various human cancers. The expression levels of specific miRNAs are used to identify their roles as either tumor suppressors or oncogenes in cancer. The researchers have already cleaned the data, and the data given to us is already cleaned. However, we are uncertain about the data collection process or the data cleaning that they conducted.
+
+### Data Dimensions
+
+The cleaned dataset consists of 627 different miRNAs (rows) and data from 4 healthy individuals and 9 glioblastoma patients (columns). The data has two types of variables: numerical and categorical. The name of each miRNA is coded as text, which is considered a categorical variable. The values that represent expression levels for the control group and the glioblastoma groups are all integers.
+
+### Validation of the Data Cleaning
+
+We have checked that the data does not contain any duplicate miRNA; in other words, each row represents a unique miRNA. Moreover, we also verified that the values for the control and glioblastoma columns are all non-negative, and there are no missing values in this dataset. In this EDA section, there is no distinct outlier since the expression levels of a miRNA vary a lot. Hence, no data was removed, and we did not transform the data.
+
 ### Descriptive Statistics
 
 ```{r, warning=FALSE, echo=FALSE, message=FALSE}
