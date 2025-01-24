@@ -205,7 +205,6 @@ correlation_summary %>%
 
 The summary of miRNA correlations indicates a total of 261,302 positive correlations and 131,200 negative correlations among the miRNAs. The mean correlation value is 0.40, suggesting a general tendency toward positive correlations, while the median is 0.63, highlighting a skew toward stronger positive relationships. The minimum correlation value is -0.91, showing the presence of strong negative correlations, while the maximum is nearly 1, reflecting near-perfect positive correlations. This distribution underscores the complex and diverse interactions among miRNAs, with both cooperative and antagonistic regulatory relationships evident.
 
-
 ```{r, include=FALSE}
 countdata <- data
 coldata <- tibble(id=c("Ctrl1", "Ctrl2", "Ctrl3", "Ctrl4", "GBM1", "GBM2", "GBM3", "GBM4", "GBM5", "GBM6", "GBM7", "GBM8", "GBM9"), condition=c("control", "control", "control", "control", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM"))
