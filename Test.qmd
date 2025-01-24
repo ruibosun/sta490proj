@@ -28,8 +28,13 @@ library(knitr)
 library(kableExtra)
 library(igraph)
 library(ggraph)
+library(tidyverse)
 library(pheatmap)
 library(tidyr)
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("DESeq2")
+library("DESeq2")
 # Load the data
 data <- 
   read_excel("/Users/yuqinghu/Desktop/STA490/CollaborateProject/GSE156937.xlsx", 
@@ -199,3 +204,91 @@ correlation_summary %>%
 ```
 
 The summary of miRNA correlations indicates a total of 261,302 positive correlations and 131,200 negative correlations among the miRNAs. The mean correlation value is 0.40, suggesting a general tendency toward positive correlations, while the median is 0.63, highlighting a skew toward stronger positive relationships. The minimum correlation value is -0.91, showing the presence of strong negative correlations, while the maximum is nearly 1, reflecting near-perfect positive correlations. This distribution underscores the complex and diverse interactions among miRNAs, with both cooperative and antagonistic regulatory relationships evident.
+
+
+```{r, include=FALSE}
+countdata <- data
+coldata <- tibble(id=c("Ctrl1", "Ctrl2", "Ctrl3", "Ctrl4", "GBM1", "GBM2", "GBM3", "GBM4", "GBM5", "GBM6", "GBM7", "GBM8", "GBM9"), condition=c("control", "control", "control", "control", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM", "GBM"))
+dds <- DESeqDataSetFromMatrix(countData = countdata,
+                              colData = coldata,
+                              design= ~ condition, tidy=TRUE)
+```
+
+```{r, include=FALSE}
+dds <- DESeq(dds)
+res <- results(dds)
+```
+
+#### 1. Identifying top 10 miRNAs with largest absolute log fold change
+
+```{r}
+# Select top 10 miRNAs with largest absolute value of log fold change
+res$abs_log2FoldChange <- abs(res$log2FoldChange)
+res <- res[order(res$abs_log2FoldChange, decreasing = TRUE),]
+data.frame(res[1:10,c(1,2,5)])
+```
+
+Difference in miRNA expression level across the control group and GBM group was further investigated using a log2 fold change transformation. Fold change is a measure of quantity change by taking the ratio between the original measurement and subsequent measurement, which in this dataset is the ratio between the GBM group and control group. Thus, a positive value would indicate a large percentage increase in expression in the GBM group compared to the control group, while a negative value would indicate a decrease in expression. Higher absolute values indicate larger changes.
+
+It can be observed that miRNAs that show large changes in expression level generally have a high base expression level. Changes can be as high as 36 times the base level, and p-values are generally small.
+
+```{r}
+par(mfrow=c(2,3))
+
+plotCounts(dds, gene="hsa-miR-137|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-129-2-3p|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-124-3p|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-1246|0.005", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-218-5p|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-21-5p|0", intgroup="condition")
+
+```
+
+```{r}
+par(mfrow=c(2,3))
+
+plotCounts(dds, gene="hsa-miR-129-5p|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-128-3p|0.006", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-139-3p|0", intgroup="condition")
+plotCounts(dds, gene="hsa-miR-433-3p|0", intgroup="condition")
+
+
+```
+
+For the top ten miRNAs with largest change in expression level, a comparison between control and GBM groups is shown above.
+
+#### 2. Volcano plot
+
+```{r}
+# Volcano plot
+#reset par
+par(mfrow=c(1,1))
+# Make a basic volcano plot
+with(res, plot(log2FoldChange, -log10(pvalue), pch=20, main="Volcano plot", xlim=c(-3,3)))
+
+# Add colored points: blue if padj<0.01, red if log2FC>1 and padj<0.05)
+with(subset(res, padj<.01 ), points(log2FoldChange, -log10(pvalue), pch=20, col="blue"))
+with(subset(res, padj<.01 & abs(log2FoldChange)>2), points(log2FoldChange, -log10(pvalue), pch=20, col="red"))
+```
+
+Volcano plots are scatterplots that plots significance versus fold change on the y and x axis to quickly identify change in large datasets. In this plot, significance is represented by -log10(p-value) in the y-axis, where points with smaller p-values are expected to have larger values. Change size is indicated by (log2 fold change) on the x-axis, where negative values represent decrease and positive values represent increase. As displayed in the volcano plot, the distribution is slightly asymmetrical, where large decreases in expression level tend to have smaller p-values.
+
+#### 3. PCA
+
+```{r}
+vsdata <- vst(dds, blind=FALSE, nsub = nrow(dds))
+plotPCA(vsdata, intgroup="condition")
+```
+
+As displayed in the PCA plot, the x-axis (PC1) captures the largest source of variability and explains 48% of the total variance in the dataset, while the y-axis (PC2) explains 12% of the variance, representing the second largest, orthogonal source of variability. Together, PC1 and PC2 explain 60% of the total variance. Points representing the control group are tightly clustered on the left side of the plot (negative PC1 values), while points representing the GBM group is clustered on the right. PC1 primarily separates the two groups, suggesting that the variability captured by PC1 is strongly associated with differences between the control and GBM samples. Points are clustered tightly within each group, indicating low variability within groups along both PC1 and PC2.
+
+#### 4. Heat map
+
+```{r}
+select <- order(rowMeans(counts(dds,normalized=TRUE)),
+                decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(dds)[,c("condition")])
+rownames(df) <- colnames(dds)
+pheatmap(assay(dds), cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+```
